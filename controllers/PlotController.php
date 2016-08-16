@@ -229,10 +229,10 @@ class PlotController extends BaseController
     public function getData($question_id, $country, $overMedia = false)
     {
         if ($country=='resumen') {
-            $sql = "SELECT options.option_id, options.name, count(1) as c FROM answers left join interviews on answers.interview_id=interviews.id  left join options on options.question_id=answers.question_id and options.option_id=answers.option_id where answers.question_id=:qid and active=1 group by options.option_id having c>1 order by c desc;";
+            $sql = "SELECT options.option_id, options.name, count(1) as c FROM answers left join interviews on answers.interview_id=interviews.id  left join options on options.question_id=answers.question_id and options.option_id=answers.option_id where answers.question_id=:qid and active=1 group by options.option_id having c>0 order by c desc;";
             $list = \Yii::$app->db->createCommand($sql, [':qid' => $question_id])->queryAll();
         } else {
-            $sql = "SELECT options.option_id, options.name, count(1) as c FROM answers left join interviews on answers.interview_id=interviews.id  left join options on options.question_id=answers.question_id and options.option_id=answers.option_id where answers.question_id=:qid and country=:country and active=1 group by options.option_id having c>1 order by c desc;";
+            $sql = "SELECT options.option_id, options.name, count(1) as c FROM answers left join interviews on answers.interview_id=interviews.id  left join options on options.question_id=answers.question_id and options.option_id=answers.option_id where answers.question_id=:qid and country=:country and active=1 group by options.option_id having c>0 order by c desc;";
             $list = \Yii::$app->db->createCommand($sql, [':qid' => $question_id, ':country' => $country])->queryAll();
         }
 

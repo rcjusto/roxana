@@ -19,7 +19,7 @@ if (!empty($list)) {
     $freq_rel = StatsUtil::frecuenciasRelativas($list);
     $list_media = StatsUtil::mediaData($real);
     $list_moda = StatsUtil::moda($real);
-    $list_varianza = StatsUtil::varianza($list);
+    $list_varianza = StatsUtil::varianza($real);
     $list_desv_tip = sqrt($list_varianza);
 
     $columns = [];
@@ -41,7 +41,7 @@ if (!empty($list)) {
         $f_rel[$colKey] = StatsUtil::frecuenciasRelativas($data[$colKey]);
         $medias[$colKey] = StatsUtil::mediaData($fullData['real-'.$colKey]);
         $modas[$colKey] = StatsUtil::moda($fullData['real-'.$colKey]);
-        $varianza[$colKey] = StatsUtil::varianza($fullData[$colKey]);
+        $varianza[$colKey] = StatsUtil::varianza($fullData['real-'.$colKey]);
         $desv_est[$colKey] = sqrt($varianza[$colKey]);
     }
 }
@@ -130,6 +130,25 @@ if (!empty($list)) {
                     <td class="number"><?= number_format($modas[$k], 0, '.', '') ?></td>
                 <?php } ?>
             </tr>
+            <tr>
+                <td><h3>Varianza</h3></td>
+                <td class="number"><?= number_format($list_varianza, 2, '.', '') ?></td>
+                <td>&nbsp;</td>
+                <td class="blank">&nbsp;</td>
+                <?php foreach ($columns as $k => $value) { ?>
+                    <td class="number"><?= number_format($varianza[$k], 2, '.', '') ?></td>
+                <?php } ?>
+            </tr>
+            <tr>
+                <td><h3>Desviacion Estandar</h3></td>
+                <td class="number"><?= number_format($list_desv_tip, 2, '.', '') ?></td>
+                <td>&nbsp;</td>
+                <td class="blank">&nbsp;</td>
+                <?php foreach ($columns as $k => $value) { ?>
+                    <td class="number"><?= number_format($desv_est[$k], 2, '.', '') ?></td>
+                <?php } ?>
+            </tr>
+
             </tfoot>
         </table>
     </div>

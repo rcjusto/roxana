@@ -37,18 +37,20 @@ class PlotController extends BaseController
 
         $question = isset($_REQUEST['question']) ? $_REQUEST['question'] : 0;
         $country = isset($_REQUEST['country']) ? $_REQUEST['country'] : 0;
+        $over_percent = isset($_REQUEST['over_percent']) ? $_REQUEST['over_percent'] : 0;
 
         if (!array_key_exists($question, $questions)) $question = array_keys($questions)[0];
         if (!array_key_exists($country, $countries)) $country = array_keys($countries)[0];
 
         $template = $this->getSelectedTemplate($question);
-        $data = $this->getSVGData($question, $country, (!is_null($template)) ? $template->id : 0);
+        $data = $this->getSVGData($question, $country, (!is_null($template)) ? $template->id : 0, $over_percent);
 
         return $this->render('index', [
             'countries' => $countries,
             'country' => $country,
             'questions' => $questions,
             'question' => $question,
+            'over_percent' => $over_percent,
             'svg' => $data[0],
             'colors' => $data[1],
             'total' => $data[2],
@@ -64,12 +66,13 @@ class PlotController extends BaseController
 
         $question = isset($_REQUEST['question']) ? $_REQUEST['question'] : 0;
         $country = isset($_REQUEST['country']) ? $_REQUEST['country'] : 0;
+        $over_percent = isset($_REQUEST['over_percent']) ? $_REQUEST['over_percent'] : 0;
 
         if (!array_key_exists($question, $questions)) $question = array_keys($questions)[0];
         if (!array_key_exists($country, $countries)) $country = array_keys($countries)[0];
 
         $template = $this->getSelectedTemplate($question);
-        $data = $this->getSVGData($question, $country, (!is_null($template)) ? $template->id : 0);
+        $data = $this->getSVGData($question, $country, (!is_null($template)) ? $template->id : 0, $over_percent);
 
         /** @var Response $response */
         $response = Yii::$app->getResponse();
@@ -91,13 +94,14 @@ class PlotController extends BaseController
 
         $question = isset($_REQUEST['question']) ? $_REQUEST['question'] : 0;
         $country = isset($_REQUEST['country']) ? $_REQUEST['country'] : 0;
+        $over_percent = isset($_REQUEST['over_percent']) ? $_REQUEST['over_percent'] : 0;
 
         if (!array_key_exists($question, $questions)) $question = array_keys($questions)[0];
         if (!array_key_exists($country, $countries)) $country = array_keys($countries)[0];
 
         $template = $this->getSelectedTemplate($question);
         $outputfile = Yii::getAlias('@runtime/tmp/'.$country.$question.'.png');
-        $this->generateImage($question, $country, $template, $outputfile);
+        $this->generateImage($question, $country, $template, $over_percent, $outputfile);
 
         /** @var Response $response */
         $response = Yii::$app->getResponse();
@@ -123,13 +127,14 @@ class PlotController extends BaseController
 
         $question = isset($_REQUEST['question']) ? $_REQUEST['question'] : 0;
         $country = isset($_REQUEST['country']) ? $_REQUEST['country'] : 0;
+        $over_percent = isset($_REQUEST['over_percent']) ? $_REQUEST['over_percent'] : 0;
 
         if (!array_key_exists($question, $questions)) $question = array_keys($questions)[0];
         if (!array_key_exists($country, $countries)) $country = array_keys($countries)[0];
 
         $template = $this->getSelectedTemplate($question);
         $outputfile = Yii::getAlias('@runtime/tmp/'.$country.$question.'.png');
-        $this->generateImage($question, $country, $template, $outputfile);
+        $this->generateImage($question, $country, $template, $over_percent, $outputfile);
 
         $content = $this->renderPartial('pdf', [
             'countries' => $countries,
@@ -166,13 +171,11 @@ class PlotController extends BaseController
 
     }
 
-    public function getSVGData($question, $country, $theme_id = 0)
+    public function getSVGData($question, $country, $theme_id = 0, $over_perc = 0)
     {
 
         $overMedia = Properties::getQuestionMedia($question, $country);
-
         $list = $this->getData($question, $country, $overMedia);
-
         $svgColors = new SVGColors();
 
         $colors1 = $svgColors->getColorsBetween('#bd7305', [255, 255, 255], 8);
@@ -212,17 +215,23 @@ class PlotController extends BaseController
         $total = 0;
         $colors = empty($colors2) ? $svgColors->getColors1($list, $colors1) : $svgColors->getColors2($list, $colors1, $colors2);
 
+        $legend_list = array();
         if (count($list) > 0) {
+            foreach($list as $row) $total += $row['c'];
+
             $svgMap->maxValue = $list[0]['c'];
             foreach ($list as $row) {
                 $id = $row['option_id'];
-                $v = $row['c'];
-                $svgMap->setCountryColor($colors[$id], null, null, $id);
-                $total += $v;
+                $row['percent'] = $row['c'] * 100 / $total;
+                $perc_display = intval(number_format($row['percent'],0));
+                if ($perc_display >= $over_perc) {
+                    $svgMap->setCountryColor($colors[$id], null, null, $id);
+                    $legend_list[] = $row;
+                }
             }
         }
 
-        $svgMap->addLegend($list, $colors);
+        $svgMap->addLegend($legend_list, $colors);
         return [$svgMap->getContent(), $colors, $total];
     }
 
@@ -268,8 +277,8 @@ class PlotController extends BaseController
 
     }
 
-    public function generateImage($question, $country, $template, $outputfile) {
-        $data = $this->getSVGData($question, $country, (!is_null($template)) ? $template->id : 0);
+    public function generateImage($question, $country, $template, $over_percent, $outputfile) {
+        $data = $this->getSVGData($question, $country, (!is_null($template)) ? $template->id : 0, $over_percent);
         $svg = $data[0];
 
         $rasterizer_jar = Yii::getAlias('@runtime/batik-1.8/batik-rasterizer-1.8.jar');

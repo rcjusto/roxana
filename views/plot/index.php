@@ -9,6 +9,7 @@ use yii\helpers\Html;
 /* @var $colors [] */
 /* @var $country string */
 /* @var $question string */
+/* @var $over_percent string */
 /* @var $template Themes */
 
 $template_id = !is_null($template) ? $template->id : 0;
@@ -18,11 +19,24 @@ $template_id = !is_null($template) ? $template->id : 0;
     <?php $form = ActiveForm::begin(['id'=>'formPlot']) ?>
     <?= Html::hiddenInput('template', '', ['id'=>'fld_template'])?>
     <div class="row">
-        <div class="col-lg-9">
-            <?= Html::dropDownList('question', $question, $questions, ['class' => 'form-control input-lg', 'onchange' => '$(this).closest("form").submit();']) ?>
+        <div class="col-lg-12">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon" id="sizing-addon1">Pregunta</span>
+                <?= Html::dropDownList('question', $question, $questions, ['class' => 'form-control input-lg', 'onchange' => '$(this).closest("form").submit();']) ?>
+            </div>
         </div>
-        <div class="col-lg-3">
-            <?= Html::dropDownList('country', $country, $countries, ['class' => 'form-control input-lg', 'onchange' => '$(this).closest("form").submit();']) ?>
+        <div class="col-md-8" style="margin-top: 10px;">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon" id="sizing-addon1">Pa&iacute;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <?= Html::dropDownList('country', $country, $countries, ['class' => 'form-control input-lg', 'onchange' => '$(this).closest("form").submit();']) ?>
+            </div>
+        </div>
+        <div class="col-md-4" style="margin-top: 10px;">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon" id="sizing-addon1">Mostrar ></span>
+                <?= Html::textInput('over_percent', $over_percent, ['class' => 'form-control input-lg', 'onchange' => '$(this).closest("form").submit();', 'style'=>'text-align:right;']) ?>
+                <span class="input-group-addon" id="sizing-addon1">%</span>
+            </div>
         </div>
     </div>
     <?php ActiveForm::end() ?>
@@ -33,8 +47,8 @@ $template_id = !is_null($template) ? $template->id : 0;
 <div style="position: relative">
 
     <div style="position: absolute; top:10px;left: 10px;">
-        <a class="btn btn-primary" href="<?= \yii\helpers\Url::to(['pdf', 'question' => $question, 'country' => $country ,'template'=>$template_id]) ?>"><span class="glyphicon glyphicon-save"></span> PDF</a>
-        <a class="btn btn-primary" target="_blank" href="<?= \yii\helpers\Url::to(['image', 'question' => $question, 'country' => $country,'template'=>$template_id]) ?>"><span class="glyphicon glyphicon-save"></span> PNG</a>
+        <a class="btn btn-primary" href="<?= \yii\helpers\Url::to(['pdf', 'question' => $question, 'country' => $country ,'template'=>$template_id, 'over_percent'=>$over_percent]) ?>"><span class="glyphicon glyphicon-save"></span> PDF</a>
+        <a class="btn btn-primary" target="_blank" href="<?= \yii\helpers\Url::to(['image', 'question' => $question, 'country' => $country,'template'=>$template_id, 'over_percent'=>$over_percent]) ?>"><span class="glyphicon glyphicon-save"></span> PNG</a>
     </div>
 
     <div id="blockSvg" class="load-svg2" data-url="<?= \yii\helpers\Url::to(['svg', 'question' => $question, 'country' => $country,'template'=>$template_id]) ?>"><?= $svg ?></div>

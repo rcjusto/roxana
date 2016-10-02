@@ -127,9 +127,6 @@ class SVGMap
     }
 
     public function addLegend($list, $colors) {
-        $total = 0;
-        foreach($list as $row) $total += $row['c'];
-
         $xPath = new DOMXPath($this->doc);
         $root = $xPath->query("//*[@id='legend']")->item(0);
 
@@ -152,7 +149,7 @@ class SVGMap
             $name = $row['name'];
             $c = $row['c'];
             $color = $colors[$id];
-            $perc = number_format($c * 100 / $total,0) . '%';
+            $perc = number_format($row['percent'],0) . '%';
 
             $g = $this->doc->createElement('g');
             $g->setAttribute('transform', "translate($x $y)");
